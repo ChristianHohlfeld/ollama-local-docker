@@ -41,6 +41,4 @@ Run Ollama's powerful AI models locally with a user-friendly web UI. This setup 
 
 ## Ollama API Documentation
 
-Explore the full capabilities of the Ollama API by visiting the [official Ollama API documentation]([https://ollama.com/docs/api](https://github.com/ollama/ollama/blob/main/docs/api.md)).
-
-Visit [http://ollama.com](http://ollama.com) for official documentation.
+Explore the full capabilities of the Ollama API by visiting the [official Ollama API documentation]([https://ollama.com]([https://ollama.com)).
