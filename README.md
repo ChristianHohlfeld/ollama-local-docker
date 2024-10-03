@@ -1,7 +1,7 @@
 
 # Ollama Local Docker
 
-<img src="https://github.com/ChristianHohlfeld/ollama-local-docker/blob/main/ohlama.png" alt="Oh, Lama!" width="100" height="100">
+<img src="https://github.com/ChristianHohlfeld/ollama-local-docker/blob/main/ohlama.png" alt="Oh, Lama!" width="256" height="256">
 
 This repository contains a simple setup to run Ollama's API locally with a web UI. It uses Docker to run both the Ollama API and the web interface.
 
