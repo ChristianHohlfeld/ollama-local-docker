@@ -27,7 +27,7 @@ Run Ollama's powerful AI models locally with a user-friendly web UI. This setup 
    ```
 4. Access the web UI at [http://localhost:3001/webui](http://localhost:3001/webui).
 
-## SEO-Optimized Tags
+## Tags
 
 - AI models
 - Ollama API
