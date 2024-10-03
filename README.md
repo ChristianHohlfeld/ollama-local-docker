@@ -28,3 +28,4 @@ This repository contains a basic setup for hosting a local Ollama API and web UI
 
 ## Download
 [Download this repository](https://github.com/ChristianHohlfeld/ollama-local-docker/archive/refs/heads/main.zip)
+
