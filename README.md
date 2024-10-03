@@ -1,4 +1,3 @@
-
 # Ollama Local Docker
 
 This repository contains a simple setup to run Ollama's API locally with a web UI. It uses Docker to run both the Ollama API and the web interface.
@@ -15,9 +14,13 @@ docker-compose up --build
 # Download llama3.2:1b model
 curl -X POST http://localhost:11434/api/pull -H "Content-Type: application/json" -d '{"model": "llama3.2:1b"}'
 ```
+or use the larger model (slow response without gpu):
+```bash
+# Download llama3.2 model
+curl -X POST http://localhost:11434/api/pull -H "Content-Type: application/json" -d '{"model": "llama3.2"}'
+```
 4. Open [http://localhost:3001/webui](http://localhost:3001/webui) in your browser to interact with the web UI.
 
 ## Ollama API Documentation
 
 For more details on the Ollama API, refer to the [official Ollama API documentation](https://ollama.com/docs/api).
-
