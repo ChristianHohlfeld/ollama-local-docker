@@ -1,0 +1,27 @@
+services:
+  express-server:
+    build: .
+    container_name: auto_ssl_webui_server
+    restart: always
+    ports:
+      - "80:80"
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+  ollama-api:
+    image: ollama/ollama:latest
+    container_name: ollama-api
+    restart: always
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=http://0.0.0.0:11434
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
