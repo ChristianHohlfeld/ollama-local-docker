@@ -1,4 +1,3 @@
-[[
 # Ollama Local Docker
 
 Run Ollama's powerful AI models locally with a user-friendly web UI. This setup leverages Docker to run both the Ollama API and a custom web interface, allowing you to interact seamlessly with language models like llama3.2.
