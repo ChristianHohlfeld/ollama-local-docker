@@ -1,7 +1,7 @@
 
 # Ollama Local Docker
 
-This repository contains a simple setup to run Ollama's API locally with a web UI. It uses Docker to run both the Ollama API and the web interface.
+This repository contains a simple setup to run Ollama's API locally with a basic web UI. It uses Docker to run both the Ollama API and the web interface.
 
 ## Running the Project
 
