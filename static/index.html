@@ -31,8 +31,9 @@
         .a4-ratio {
             height: calc(100vh - 52px); /* Available space minus header */
             width: 100%; /* Full width */
-            margin: 0; /* Remove any default margin */
-            padding: 0 16rem; /* Padding for chat card */
+            max-width: 768px; /* Set maximum width */
+            margin: 0 auto; /* Center the container */
+            padding: 0 1rem; /* Optional: Add some horizontal padding */
             background-color: #1A1A1A; /* Background for chat card */
             position: relative; /* For positioning the autoscroll button */
             display: flex;
@@ -40,21 +41,9 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 1200px) {
-            .a4-ratio {
-                padding: 0 10rem; /* Padding for medium-sized screens */
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .a4-ratio {
-                padding: 0 6rem; /* Further reduced padding for smaller screens */
-            }
-        }
-
         @media (max-width: 768px) {
             .a4-ratio {
-                padding: 0; /* No padding on mobile */
+                padding: 0 0.5rem; /* Optional: Slight padding on mobile */
             }
         }
 
@@ -122,7 +111,8 @@
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar text-white w-64 fixed top-0 left-0 h-full overflow-y-auto sidebar-hidden">
         <div class="p-4 flex justify-between items-center header-color-sidebar-header">
-            <button id="closeBtn" class="transparent-btn text-white text-2xl cursor-pointer">&times;</button>
+            <!-- Hamburger icon in the sidebar header -->
+            <button id="sidebarHamburger" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
         </div>
         <ul class="space-y-2 p-4">
             <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 1</li>
@@ -134,6 +124,7 @@
     <!-- Main content with header -->
     <div id="mainContainer" class="main-container flex-grow flex flex-col h-full">
         <header class="header-color text-white p-4 flex items-center">
+            <!-- Hamburger icon in the main header bar -->
             <button id="toggleBtn" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
             <div class="flex-1 text-lg font-bold ml-4" id="llamaLabel">llama3.2</div>
             <div class="flex-1 flex justify-end">
@@ -167,11 +158,12 @@
         </div>
     </div>
 
+    <!-- JavaScript Code -->
     <script>
         const sidebar = document.getElementById('mySidebar');
         const mainContainer = document.getElementById('mainContainer');
         const toggleBtn = document.getElementById('toggleBtn');
-        const closeBtn = document.getElementById('closeBtn');
+        const sidebarHamburger = document.getElementById('sidebarHamburger');
         const chatContainer = document.getElementById('chatContainer');
         const autoscrollButton = document.getElementById('autoscrollButton');
         let aiMessageElement = null;
@@ -182,16 +174,28 @@
         function toggleSidebar() {
             const isHidden = sidebar.classList.toggle('sidebar-hidden');
             mainContainer.classList.toggle('sidebar-open', !isHidden);
+
+            // Toggle the visibility of the hamburger icon in the main header bar
+            if (!isHidden) {
+                // Sidebar is now open, hide the hamburger icon in the main header bar
+                toggleBtn.style.display = 'none';
+            } else {
+                // Sidebar is now closed, show the hamburger icon in the main header bar
+                toggleBtn.style.display = 'block';
+            }
         }
 
         function checkMobile() {
             const hidden = isMobile();
             sidebar.classList.toggle('sidebar-hidden', hidden);
             mainContainer.classList.toggle('sidebar-open', !hidden);
+
+            // Set the visibility of the toggleBtn based on the sidebar state
+            toggleBtn.style.display = hidden ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            closeBtn.addEventListener('click', toggleSidebar);
+            sidebarHamburger.addEventListener('click', toggleSidebar);
             toggleBtn.addEventListener('click', toggleSidebar);
             checkMobile();
             window.addEventListener('resize', () => checkMobile());
