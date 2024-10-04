@@ -19,9 +19,15 @@ services:
       - "11434:11434"
     environment:
       - OLLAMA_HOST=http://0.0.0.0:11434
+    volumes:
+      - ollama-models:/root/.ollama/models # Mount a volume to persist models
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  ollama-models:
+    driver: local
