@@ -12,9 +12,9 @@ app.use(cors());
 const OLLAMA_API_URL = 'http://127.0.0.1:11434'; // Ollama API URL
 
 // Proxy requests to the Ollama API
-app.use('/ollama', (req, res) => {
-    apiProxy.web(req, res, { target: OLLAMA_API_URL });
-});
+//app.use('/ollama', (req, res) => {
+//    apiProxy.web(req, res, { target: OLLAMA_API_URL });
+//});
 
 // Serve static WebUI from the "static" folder
 app.use('/webui', express.static('static'));
