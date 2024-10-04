@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta tags and title -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask Llama 3.2 with Sidebar</title>
@@ -33,6 +34,9 @@
             margin: 0; /* Remove any default margin */
             padding: 0 16rem; /* Padding for chat card */
             background-color: #1A1A1A; /* Background for chat card */
+            position: relative; /* For positioning the autoscroll button */
+            display: flex;
+            flex-direction: column;
         }
 
         /* Responsive adjustments */
@@ -85,38 +89,53 @@
             outline: none; /* Remove outline on focus */
         }
 
-        /* Auto-scroll button */
-        #enableScrollButton {
+        /* Autoscroll Button styles */
+        .autoscroll-btn {
+            position: absolute;
+            bottom: calc(32px + 64px); /* Adjust based on input-area's margin and height */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1A1A1A;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .autoscroll-btn:hover {
+            background-color: #333333;
+        }
+
+        .autoscroll-btn.hidden {
             display: none;
-            position: fixed;
-            bottom: 70px;
-            right: 10px;
-            background-color: #333;
-            color: white;
-            border-radius: 5px;
-            padding: 8px;
         }
     </style>
 </head>
 <body class="font-sans bg-gray-100 flex">
 
     <!-- Sidebar -->
-    <div id="mySidebar" class="sidebar text-white w-64 fixed top-0 left-0 h-full overflow-y-auto">
+    <div id="mySidebar" class="sidebar text-white w-64 fixed top-0 left-0 h-full overflow-y-auto sidebar-hidden">
         <div class="p-4 flex justify-between items-center header-color-sidebar-header">
-            <button id="closeBtn" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
+            <button id="closeBtn" class="transparent-btn text-white text-2xl cursor-pointer">&times;</button>
         </div>
         <ul class="space-y-2 p-4">
-          
+            <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 1</li>
+            <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 2</li>
             <hr class="border-gray-700 my-2">
-
         </ul>
     </div>
 
     <!-- Main content with header -->
-    <div id="mainContainer" class="main-container sidebar-open flex-grow flex flex-col">
+    <div id="mainContainer" class="main-container flex-grow flex flex-col h-full">
         <header class="header-color text-white p-4 flex items-center">
             <button id="toggleBtn" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
-            <div class="flex-1 text-lg font-bold" id="llamaLabel">llama3.2</div>
+            <div class="flex-1 text-lg font-bold ml-4" id="llamaLabel">llama3.2</div>
             <div class="flex-1 flex justify-end">
                 <div class="icon-btn">
                     <i class="fas fa-cog text-white"></i>
@@ -125,10 +144,16 @@
         </header>
 
         <!-- Chat Card -->
-        <div class="a4-ratio flex flex-col">
+        <div class="a4-ratio">
+            <!-- Chat container -->
             <div id="chatContainer" class="chat-container">
                 <!-- Chat messages will appear here -->
             </div>
+
+            <!-- Autoscroll Button -->
+            <button id="autoscrollButton" class="autoscroll-btn hidden" onclick="enableAutoscroll()">
+                <i class="fas fa-arrow-down"></i>
+            </button>
 
             <!-- Input area -->
             <div class="input-area">
@@ -140,8 +165,6 @@
                 </button>
             </div>
         </div>
-        <!-- Auto-scroll button -->
-        <button id="enableScrollButton" onclick="enableAutoScroll()">Enable Auto Scroll</button>
     </div>
 
     <script>
@@ -149,8 +172,9 @@
         const mainContainer = document.getElementById('mainContainer');
         const toggleBtn = document.getElementById('toggleBtn');
         const closeBtn = document.getElementById('closeBtn');
-        const llamaLabel = document.getElementById('llamaLabel');
-        const enableScrollButton = document.getElementById('enableScrollButton');
+        const chatContainer = document.getElementById('chatContainer');
+        const autoscrollButton = document.getElementById('autoscrollButton');
+        let aiMessageElement = null;
         let autoScroll = true;
 
         const isMobile = () => window.innerWidth <= 768;
@@ -158,179 +182,158 @@
         function toggleSidebar() {
             const isHidden = sidebar.classList.toggle('sidebar-hidden');
             mainContainer.classList.toggle('sidebar-open', !isHidden);
-            llamaLabel.style.marginLeft = isHidden ? '20px' : '0';
-            toggleBtn.style.display = isHidden ? 'block' : 'none'; // Toggle visibility of the button
         }
 
         function checkMobile() {
             const hidden = isMobile();
             sidebar.classList.toggle('sidebar-hidden', hidden);
             mainContainer.classList.toggle('sidebar-open', !hidden);
-            toggleBtn.style.display = hidden ? 'block' : 'none'; // Show/hide toggle button based on mobile view
-            llamaLabel.style.marginLeft = hidden ? '20px' : '0';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             closeBtn.addEventListener('click', toggleSidebar);
             toggleBtn.addEventListener('click', toggleSidebar);
-
-            // Check mobile on page load
             checkMobile();
-window.addEventListener('resize', () => {
-    checkMobile(); // Check on resize
-});
+            window.addEventListener('resize', () => checkMobile());
+        });
 
-// Set initial visibility based on sidebar state
-toggleBtn.style.display = sidebar.classList.contains('sidebar-hidden') ? 'block' : 'none';
-llamaLabel.style.marginLeft = sidebar.classList.contains('sidebar-hidden') ? '20px' : '0';
-});
+        window.onload = () => {
+            const inputField = document.getElementById("userInput");
+            inputField.focus();
+        };
 
-// Chat Functionality
-let conversationContext = [];
-let currentAIResponse = "";  // Holds the current AI response for a single bubble
-autoScroll = true;       // Control auto-scroll behavior
+        window.onkeydown = () => {
+            document.getElementById("userInput").focus();
+        };
 
-window.onload = () => {
-    const inputField = document.getElementById("userInput");
-    inputField.focus();
-};
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendPrompt();
+            }
+        }
 
-window.onkeydown = () => {
-    document.getElementById("userInput").focus();  // Always focus input
-};
+        async function sendPrompt() {
+            const inputField = document.getElementById("userInput");
+            const userMessage = inputField.value.trim();
+            inputField.value = "";
 
-function handleKeyPress(event) {
-    if (event.key === "Enter") {
-        sendPrompt();
-        autoScroll = true;  // Enable auto-scroll on new user input
-        enableScrollButton.style.display = 'none'; // Hide auto-scroll button
-    }
-}
+            if (!userMessage) return;
 
-document.getElementById("chatContainer").addEventListener('scroll', () => {
-    const chatContainer = document.getElementById("chatContainer");
+            appendMessage(userMessage, 'user');
 
-    // Check if the user has scrolled up manually
-    if (chatContainer.scrollTop + chatContainer.clientHeight < chatContainer.scrollHeight) {
-        autoScroll = false;
-        enableScrollButton.style.display = 'block'; // Show the auto-scroll button when scrolling is disabled
-    }
-});
+            // Prepare the AI's message bubble
+            aiMessageElement = createMessageElement('', 'agent');
+            chatContainer.appendChild(aiMessageElement);
+            scrollToBottom();
 
-function enableAutoScroll() {
-    autoScroll = true;
-    enableScrollButton.style.display = 'none';  // Hide the button after enabling auto-scroll
-    scrollToBottom();  // Scroll to the bottom when auto-scroll is enabled
-}
+            const requestBody = {
+                model: 'llama3.2:1b',
+                prompt: userMessage,
+                context: []
+            };
 
-async function sendPrompt() {
-    const inputField = document.getElementById("userInput");
-    const userMessage = inputField.value.trim();
-    inputField.value = "";  // Clear input field
+            try {
+                const response = await fetch('https://fakturamedical.de/ollama/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
 
-    if (!userMessage) return;
+                if (!response.ok) {
+                    throw new Error("Bad Request");
+                }
 
-    // Display the user's message
-    appendMessage(userMessage, 'user');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let done = false;
+                let tokenBuffer = '';
 
-    // Prepare the request body
-    const requestBody = {
-        model: 'llama3.2:1b',
-        prompt: userMessage,
-        context: conversationContext.length > 0 ? conversationContext : []
-    };
+                while (!done) {
+                    const { value, done: readerDone } = await reader.read();
+                    done = readerDone;
 
-    try {
-    const response = await fetch('http://localhost:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-    });
+                    if (value) {
+                        tokenBuffer += decoder.decode(value, { stream: true });
+                        const tokens = tokenBuffer.split('\n');
+                        tokenBuffer = tokens.pop();
 
-    if (!response.ok) {
-        throw new Error("Bad Request");
-    }
-
-    // Process the streamed response
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let done = false;
-    let tokenBuffer = '';
-    currentAIResponse = "";  // Reset the current AI response
-
-    let aiMessageElement = appendMessage('', 'agent', true);  // Start a new AI message bubble
-
-    while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-
-        if (value) {
-            tokenBuffer += decoder.decode(value, { stream: true });
-
-            // Split on newline to process each token individually
-            const tokens = tokenBuffer.split('\n');
-            tokenBuffer = tokens.pop();  // Keep the last incomplete token in buffer
-
-            tokens.forEach(token => {
-                if (token.trim()) {
-                    try {
-                        const parsed = JSON.parse(token);
-                        currentAIResponse += parsed.response;  // Append token to the current AI response
-                        aiMessageElement.textContent = currentAIResponse;  // Update the AI bubble in real-time
-
-                        if (parsed.context) {
-                            conversationContext.push(...parsed.context);  // Update context safely
-                        }
-
-                        if (autoScroll) {
-                            scrollToBottom();  // Auto-scroll if enabled
-                        }
-
-                    } catch (error) {
-                        console.error("Error parsing token:", error);
+                        tokens.forEach(token => {
+                            if (token.trim()) {
+                                try {
+                                    const parsed = JSON.parse(token);
+                                    aiMessageElement.textContent += parsed.response; // Append new tokens
+                                    scrollToBottom(); // Ensure autoscroll during streaming
+                                } catch (error) {
+                                    console.error("Error parsing token:", error);
+                                }
+                            }
+                        });
                     }
                 }
-            });
+
+                aiMessageElement = null;
+
+            } catch (error) {
+                aiMessageElement = null;
+                appendMessage(`Error: ${error.message}`, 'agent');
+            }
         }
-    }
-} catch (error) {
-    appendMessage(`Error: ${error.message}`, 'agent');
-}
 
-}
+        function createMessageElement(message, sender) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add('p-2', 'rounded-md', 'mb-2', 'w-fit', 'max-w-full');
 
-// Function to append a message to the chat
-function appendMessage(message, sender, isTemporary = false) {
-    const chatContainer = document.getElementById("chatContainer");
-    const messageElement = document.createElement("div");
-    messageElement.classList.add('p-2', 'rounded-md', 'mb-2', 'w-fit', 'max-w-full');
+            if (sender === 'user') {
+                messageElement.classList.add('bg-blue-500', 'self-end', 'text-white');
+            } else if (sender === 'agent') {
+                messageElement.classList.add('bg-gray-700', 'text-white', 'self-start');
+            }
 
-    if (sender === 'user') {
-        messageElement.classList.add('bg-blue-500', 'self-end');
-        messageElement.textContent = message;
-    } else if (sender === 'agent') {
-        messageElement.classList.add('text-white', 'self-start');
-        if (isTemporary) {
-            chatContainer.appendChild(messageElement);  // Add an empty bubble first
-            return messageElement;  // Return the element so we can update it in real-time
-        } else {
-            messageElement.textContent = message;  // Only add message if it’s a finalized one
+            messageElement.textContent = message;
+            return messageElement;
         }
-    }
 
-    chatContainer.appendChild(messageElement);
-    if (autoScroll) {
-        scrollToBottom();  // Auto-scroll to bottom when a new message is appended
-    }
-    return messageElement;
-}
+        function appendMessage(message, sender) {
+            const messageElement = createMessageElement(message, sender);
+            chatContainer.appendChild(messageElement);
+            scrollToBottom();
+        }
 
-// Function to scroll to the bottom of the chat
-function scrollToBottom() {
-    const chatContainer = document.getElementById("chatContainer");
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
+        function scrollToBottom() {
+            if (autoScroll) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
 
+        function disableAutoscroll() {
+            autoScroll = false;
+            showAutoscrollButton();
+        }
+
+        function enableAutoscroll() {
+            autoScroll = true;
+            scrollToBottom();
+            hideAutoscrollButton();
+        }
+
+        function showAutoscrollButton() {
+            autoscrollButton.classList.remove('hidden');
+        }
+
+        function hideAutoscrollButton() {
+            autoscrollButton.classList.add('hidden');
+        }
+
+        // Check if the user has scrolled away from the bottom
+        chatContainer.addEventListener('scroll', () => {
+            const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 1; // Tolerance
+
+            if (!isAtBottom && autoScroll) {
+                disableAutoscroll();
+            } else if (isAtBottom && !autoScroll) {
+                enableAutoscroll();
+            }
+        });
     </script>
 
 </body>
