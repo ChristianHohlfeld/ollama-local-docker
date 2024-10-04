@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,31 +19,43 @@
         ::-webkit-scrollbar-track { background-color: #111827; }
 
         /* Sidebar styles */
-        .sidebar { transition: transform 0.1s ease; background-color: #282828; }
+        .sidebar { transition: transform 0.1s ease; background-color: #374151; }
         .sidebar-hidden { transform: translateX(-100%); }
 
         /* Header and Main Container styles */
-        .header-color { background-color: #181818; height: 52px; }
-        .main-container { transition: margin-left 0.1s ease; background-color: #101010; }
+        .header-color { background-color: #1f2937; height: 52px; }
+        .main-container { transition: margin-left 0.1s ease; }
         .sidebar-open { margin-left: 16rem; }
-        .header-color-sidebar-header { background-color: #282828; height: 52px; }
+        .header-color-sidebar-header { background-color: #374151; height: 52px; }
 
         /* Chat Card styles */
         .a4-ratio {
             height: calc(100vh - 52px); /* Available space minus header */
             width: 100%; /* Full width */
-            max-width: 768px; /* Set maximum width */
-            margin: 0 auto; /* Center the container */
-            padding: 0 1rem; /* Optional: Add some horizontal padding */
+            margin: 0; /* Remove any default margin */
+            padding: 0 16rem; /* Padding for chat card */
+            background-color: #1A1A1A; /* Background for chat card */
             position: relative; /* For positioning the autoscroll button */
             display: flex;
             flex-direction: column;
         }
 
         /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .a4-ratio {
+                padding: 0 10rem; /* Padding for medium-sized screens */
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .a4-ratio {
+                padding: 0 6rem; /* Further reduced padding for smaller screens */
+            }
+        }
+
         @media (max-width: 768px) {
             .a4-ratio {
-                padding: 0 0.5rem; /* Optional: Slight padding on mobile */
+                padding: 0; /* No padding on mobile */
             }
         }
 
@@ -51,8 +64,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 1rem;
-            background-color: #202020; /* Updated background color */
-            color: #F0F0F0; /* Lighter text */
+            background-color: #2A2A2A; /* Background color for chat */
         }
 
         /* Input area styles */
@@ -67,8 +79,8 @@
 
         .input-field {
             flex-grow: 1; /* Take up remaining space */
-            background-color: #333333; /* Adjusted for better contrast */
-            color: #FFFFFF; /* White text for readability */
+            background-color: transparent; /* Transparent background */
+            color: #CCCCCC; /* Text color */
             padding: 0.5rem; /* Padding for the input */
             border: none; /* No border */
             border-radius: 9999px; /* Rounded corners */
@@ -104,37 +116,6 @@
         .autoscroll-btn.hidden {
             display: none;
         }
-
-        /* Button styles */
-        button {
-            background-color: #444444; /* Darker button background */
-            color: #F5F5F5; /* White text or icons */
-        }
-
-        /* Chat bubble styles */
-        .message-bubble {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            max-width: 80%; /* Limit user message width */
-            word-wrap: break-word;
-        }
-
-        /* User message - aligned to the right */
-        .user-message {
-            background-color: #4b5563;
-            color: #ffffff;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        /* AI message - full width */
-        .ai-message {
-            background-color: #2A2A2A;
-            color: #ffffff;
-            width: 100%; /* Full width for AI message */
-            text-align: left;
-        }
     </style>
 </head>
 <body class="font-sans bg-gray-100 flex">
@@ -142,8 +123,7 @@
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar text-white w-64 fixed top-0 left-0 h-full overflow-y-auto sidebar-hidden">
         <div class="p-4 flex justify-between items-center header-color-sidebar-header">
-            <!-- Hamburger icon in the sidebar header -->
-            <button id="sidebarHamburger" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
+            <button id="closeBtn" class="transparent-btn text-white text-2xl cursor-pointer">&times;</button>
         </div>
         <ul class="space-y-2 p-4">
             <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 1</li>
@@ -155,7 +135,6 @@
     <!-- Main content with header -->
     <div id="mainContainer" class="main-container flex-grow flex flex-col h-full">
         <header class="header-color text-white p-4 flex items-center">
-            <!-- Hamburger icon in the main header bar -->
             <button id="toggleBtn" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
             <div class="flex-1 text-lg font-bold ml-4" id="llamaLabel">llama3.2</div>
             <div class="flex-1 flex justify-end">
@@ -189,12 +168,11 @@
         </div>
     </div>
 
-    <!-- JavaScript Code -->
     <script>
         const sidebar = document.getElementById('mySidebar');
         const mainContainer = document.getElementById('mainContainer');
         const toggleBtn = document.getElementById('toggleBtn');
-        const sidebarHamburger = document.getElementById('sidebarHamburger');
+        const closeBtn = document.getElementById('closeBtn');
         const chatContainer = document.getElementById('chatContainer');
         const autoscrollButton = document.getElementById('autoscrollButton');
         let aiMessageElement = null;
@@ -205,28 +183,16 @@
         function toggleSidebar() {
             const isHidden = sidebar.classList.toggle('sidebar-hidden');
             mainContainer.classList.toggle('sidebar-open', !isHidden);
-
-            // Toggle the visibility of the hamburger icon in the main header bar
-            if (!isHidden) {
-                // Sidebar is now open, hide the hamburger icon in the main header bar
-                toggleBtn.style.display = 'none';
-            } else {
-                // Sidebar is now closed, show the hamburger icon in the main header bar
-                toggleBtn.style.display = 'block';
-            }
         }
 
         function checkMobile() {
             const hidden = isMobile();
             sidebar.classList.toggle('sidebar-hidden', hidden);
             mainContainer.classList.toggle('sidebar-open', !hidden);
-
-            // Set the visibility of the toggleBtn based on the sidebar state
-            toggleBtn.style.display = hidden ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            sidebarHamburger.addEventListener('click', toggleSidebar);
+            closeBtn.addEventListener('click', toggleSidebar);
             toggleBtn.addEventListener('click', toggleSidebar);
             checkMobile();
             window.addEventListener('resize', () => checkMobile());
@@ -268,7 +234,7 @@
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:3001/ollama/api/generate', {
+                const response = await fetch('http://localhost:3001/ollama/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
@@ -316,12 +282,12 @@
 
         function createMessageElement(message, sender) {
             const messageElement = document.createElement("div");
-            messageElement.classList.add('message-bubble');
+            messageElement.classList.add('p-2', 'rounded-md', 'mb-2', 'w-fit', 'max-w-full');
 
             if (sender === 'user') {
-                messageElement.classList.add('user-message');
+                messageElement.classList.add('bg-blue-500', 'self-end', 'text-white');
             } else if (sender === 'agent') {
-                messageElement.classList.add('ai-message');
+                messageElement.classList.add('bg-gray-700', 'text-white', 'self-start');
             }
 
             messageElement.textContent = message;
