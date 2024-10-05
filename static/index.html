@@ -88,12 +88,12 @@
         .message {
             margin-bottom: 1rem;
             padding: 1rem;
-            border-radius: 8px;
+            border-radius: 9999px; /* Fully rounded */
             word-wrap: break-word;
         }
 
         .message.user {
-            background-color: #3b82f6; /* Blue background for user messages */
+            background-color: #4b5563; /* Gray background for user messages */
             align-self: flex-end;
             max-width: 60%;
             text-align: right;
@@ -133,6 +133,24 @@
 
         .autoscroll-btn.hidden {
             display: none;
+        }
+
+        /* Send button styles */
+        .send-button {
+            background-color: #ffffff; /* White background */
+            border-radius: 9999px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover {
+            background-color: #e5e5e5;
+        }
+
+        .send-button svg {
+            color: #1A1A1A; /* Dark icon color */
         }
     </style>
 </head>
@@ -177,9 +195,9 @@
             <!-- Input area -->
             <div class="input-area">
                 <input id="userInput" type="text" class="input-field" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-                <button class="p-2 ml-2" onclick="sendPrompt()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-9.192-4.596a.75.75 0 00-1.084.67v9.516a.75.75 0 001.084.67l9.192-4.596a.75.75 0 000-1.34z"/>
+                <button class="send-button ml-2" onclick="sendPrompt()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M2.003 21l20.993-9L2.003 3v7l15 2-15 2z"/>
                     </svg>
                 </button>
             </div>
