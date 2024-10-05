@@ -4,28 +4,30 @@
     <!-- Meta tags and title -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ask Llama 3.2 with Sidebar</title>
+    <title>Ask Llama 3.2</title>
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background-color: #111827; }
+        ::-webkit-scrollbar-thumb { background-color: #555; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background-color: #1a1a1a; }
+
+        /* Dark mode colors */
+        body { background-color: #121212; color: #e0e0e0; }
 
         /* Sidebar styles */
-        .sidebar { transition: transform 0.1s ease; background-color: #374151; }
+        .sidebar { background-color: #1e1e1e; transition: transform 0.2s ease; }
         .sidebar-hidden { transform: translateX(-100%); }
 
-        /* Header and Main Container styles */
-        .header-color { background-color: #1f2937; height: 52px; }
-        .main-container { transition: margin-left 0.1s ease; }
+        /* Header styles */
+        .header { background-color: #1a1a1a; height: 52px; }
+
+        /* Main container */
+        .main-container { transition: margin-left 0.2s ease; }
         .sidebar-open { margin-left: 16rem; }
-        .header-color-sidebar-header { background-color: #374151; height: 52px; }
 
         /* Chat Card styles */
         .a4-ratio {
@@ -33,7 +35,7 @@
             width: 100%; /* Full width */
             max-width: 768px; /* Set maximum width */
             margin: 0 auto; /* Center the container */
-            padding: 0 1rem; /* Optional: Add some horizontal padding */
+            padding: 0 1rem; /* Horizontal padding */
             background-color: #1A1A1A; /* Background for chat card */
             position: relative; /* For positioning the autoscroll button */
             display: flex;
@@ -43,7 +45,7 @@
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .a4-ratio {
-                padding: 0 0.5rem; /* Optional: Slight padding on mobile */
+                padding: 0 0.5rem; /* Slight padding on mobile */
             }
         }
 
@@ -52,36 +54,64 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 1rem;
-            background-color: #2A2A2A; /* Background color for chat */
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Input area styles */
+        /* Input area */
         .input-area {
-            margin: 32px 0; /* Margin for input area */
-            display: flex; /* Flex layout for the input area */
-            align-items: center; /* Center items vertically */
-            background-color: #2A2A2A; /* Background color for input area */
-            padding: 5px; /* Padding for input area */
-            border-radius: 9999px; /* Rounded corners */
+            margin-top: 1rem;
+            margin-bottom: 15px; /* Added 15px space below input area */
+            display: flex;
+            align-items: center;
+            background-color: #1e1e1e;
+            padding: 0.5rem;
+            border-radius: 9999px;
         }
 
         .input-field {
-            flex-grow: 1; /* Take up remaining space */
-            background-color: transparent; /* Transparent background */
-            color: #CCCCCC; /* Text color */
-            padding: 0.5rem; /* Padding for the input */
-            border: none; /* No border */
-            border-radius: 9999px; /* Rounded corners */
+            flex-grow: 1;
+            background-color: transparent;
+            color: #e0e0e0;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 9999px;
         }
 
         .input-field:focus {
-            outline: none; /* Remove outline on focus */
+            outline: none;
+        }
+
+        /* Message bubbles */
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background-color: #3b82f6; /* Blue background for user messages */
+            align-self: flex-end;
+            max-width: 60%;
+            text-align: right;
+            color: #ffffff;
+        }
+
+        .message.agent {
+            /* Removed background color to blend with chat background */
+            align-self: flex-start;
+            width: 100%;
+            color: #e0e0e0;
         }
 
         /* Autoscroll Button styles */
         .autoscroll-btn {
             position: absolute;
-            bottom: calc(32px + 64px); /* Adjust based on input-area's margin and height */
+            /* Positioning the button centered above the input area with a 15px gap */
+            bottom: calc(64px + 15px); /* 64px is the approximate height of the input area */
             left: 50%;
             transform: translateX(-50%);
             background-color: #1A1A1A;
@@ -106,35 +136,31 @@
         }
     </style>
 </head>
-<body class="font-sans bg-gray-100 flex">
+<body class="font-sans flex">
 
     <!-- Sidebar -->
-    <div id="mySidebar" class="sidebar text-white w-64 fixed top-0 left-0 h-full overflow-y-auto sidebar-hidden">
-        <div class="p-4 flex justify-between items-center header-color-sidebar-header">
+    <div id="mySidebar" class="sidebar fixed top-0 left-0 h-full w-64 overflow-y-auto sidebar-hidden">
+        <div class="p-4 flex justify-between items-center header">
             <!-- Hamburger icon in the sidebar header -->
-            <button id="sidebarHamburger" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
+            <button id="sidebarHamburger" class="text-white text-2xl cursor-pointer">&#9776;</button>
         </div>
-        <ul class="space-y-2 p-4">
-            <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 1</li>
-            <li class="hover:bg-gray-600 p-2 rounded cursor-pointer">Menu Item 2</li>
-            <hr class="border-gray-700 my-2">
+        <ul class="space-y-2 p-4 text-white">
+            <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Menu Item 1</li>
+            <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Menu Item 2</li>
+            <hr class="border-gray-600 my-2">
         </ul>
     </div>
 
     <!-- Main content with header -->
-    <div id="mainContainer" class="main-container flex-grow flex flex-col h-full">
-        <header class="header-color text-white p-4 flex items-center">
+    <div id="mainContainer" class="main-container flex-grow flex flex-col">
+        <!-- Header -->
+        <header class="header text-white p-4 flex items-center">
             <!-- Hamburger icon in the main header bar -->
-            <button id="toggleBtn" class="transparent-btn text-white text-2xl cursor-pointer">&#9776;</button>
-            <div class="flex-1 text-lg font-bold ml-4" id="llamaLabel">llama3.2</div>
-            <div class="flex-1 flex justify-end">
-                <div class="icon-btn">
-                    <i class="fas fa-cog text-white"></i>
-                </div>
-            </div>
+            <button id="toggleBtn" class="text-white text-2xl cursor-pointer">&#9776;</button>
+            <h1 class="text-lg font-bold ml-4">Ask Llama 3.2</h1>
         </header>
 
-        <!-- Chat Card -->
+        <!-- Chat area -->
         <div class="a4-ratio">
             <!-- Chat container -->
             <div id="chatContainer" class="chat-container">
@@ -143,15 +169,17 @@
 
             <!-- Autoscroll Button -->
             <button id="autoscrollButton" class="autoscroll-btn hidden" onclick="enableAutoscroll()">
-                <i class="fas fa-arrow-down"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
             </button>
 
             <!-- Input area -->
             <div class="input-area">
                 <input id="userInput" type="text" class="input-field" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-                <button class="p-2 ml-1 rounded-full bg-white flex items-center justify-center" onclick="sendPrompt()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#1A1A1A">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-9.192-4.596a.75.75 0 00-1.084.67v9.516a.75.75 0 001.084.67l9.192-4.596a.75.75 0 000-1.34z" />
+                <button class="p-2 ml-2" onclick="sendPrompt()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-9.192-4.596a.75.75 0 00-1.084.67v9.516a.75.75 0 001.084.67l9.192-4.596a.75.75 0 000-1.34z"/>
                     </svg>
                 </button>
             </div>
@@ -166,49 +194,43 @@
         const sidebarHamburger = document.getElementById('sidebarHamburger');
         const chatContainer = document.getElementById('chatContainer');
         const autoscrollButton = document.getElementById('autoscrollButton');
-        let aiMessageElement = null;
         let autoScroll = true;
 
-        const isMobile = () => window.innerWidth <= 768;
-
         function toggleSidebar() {
-            const isHidden = sidebar.classList.toggle('sidebar-hidden');
-            mainContainer.classList.toggle('sidebar-open', !isHidden);
+            sidebar.classList.toggle('sidebar-hidden');
+            mainContainer.classList.toggle('sidebar-open');
 
-            // Toggle the visibility of the hamburger icon in the main header bar
-            if (!isHidden) {
-                // Sidebar is now open, hide the hamburger icon in the main header bar
-                toggleBtn.style.display = 'none';
-            } else {
-                // Sidebar is now closed, show the hamburger icon in the main header bar
-                toggleBtn.style.display = 'block';
-            }
-        }
-
-        function checkMobile() {
-            const hidden = isMobile();
-            sidebar.classList.toggle('sidebar-hidden', hidden);
-            mainContainer.classList.toggle('sidebar-open', !hidden);
-
-            // Set the visibility of the toggleBtn based on the sidebar state
-            toggleBtn.style.display = hidden ? 'block' : 'none';
+            // Toggle the visibility of the hamburger icon in the main header
+            toggleBtn.style.display = sidebar.classList.contains('sidebar-hidden') ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             sidebarHamburger.addEventListener('click', toggleSidebar);
             toggleBtn.addEventListener('click', toggleSidebar);
-            checkMobile();
-            window.addEventListener('resize', () => checkMobile());
+
+            // Adjust sidebar visibility based on screen size
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('sidebar-hidden');
+                mainContainer.classList.remove('sidebar-open');
+                toggleBtn.style.display = 'block';
+            } else {
+                sidebar.classList.remove('sidebar-hidden');
+                mainContainer.classList.add('sidebar-open');
+                toggleBtn.style.display = 'none';
+            }
         });
 
-        window.onload = () => {
-            const inputField = document.getElementById("userInput");
-            inputField.focus();
-        };
-
-        window.onkeydown = () => {
-            document.getElementById("userInput").focus();
-        };
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('sidebar-hidden');
+                mainContainer.classList.remove('sidebar-open');
+                toggleBtn.style.display = 'block';
+            } else {
+                sidebar.classList.remove('sidebar-hidden');
+                mainContainer.classList.add('sidebar-open');
+                toggleBtn.style.display = 'none';
+            }
+        });
 
         function handleKeyPress(event) {
             if (event.key === "Enter") {
@@ -226,7 +248,7 @@
             appendMessage(userMessage, 'user');
 
             // Prepare the AI's message bubble
-            aiMessageElement = createMessageElement('', 'agent');
+            const aiMessageElement = createMessageElement('', 'agent');
             chatContainer.appendChild(aiMessageElement);
             scrollToBottom();
 
@@ -265,7 +287,7 @@
                             if (token.trim()) {
                                 try {
                                     const parsed = JSON.parse(token);
-                                    aiMessageElement.textContent += parsed.response; // Append new tokens
+                                    aiMessageElement.textContent += parsed.response;
                                     scrollToBottom(); // Ensure autoscroll during streaming
                                 } catch (error) {
                                     console.error("Error parsing token:", error);
@@ -275,22 +297,19 @@
                     }
                 }
 
-                aiMessageElement = null;
-
             } catch (error) {
-                aiMessageElement = null;
-                appendMessage(`Error: ${error.message}`, 'agent');
+                aiMessageElement.textContent = `Error: ${error.message}`;
             }
         }
 
         function createMessageElement(message, sender) {
             const messageElement = document.createElement("div");
-            messageElement.classList.add('p-2', 'rounded-md', 'mb-2', 'w-fit', 'max-w-full');
+            messageElement.classList.add('message');
 
             if (sender === 'user') {
-                messageElement.classList.add('bg-blue-500', 'self-end', 'text-white');
-            } else if (sender === 'agent') {
-                messageElement.classList.add('bg-gray-700', 'text-white', 'self-start');
+                messageElement.classList.add('user');
+            } else {
+                messageElement.classList.add('agent');
             }
 
             messageElement.textContent = message;
