@@ -1,26 +1,43 @@
+// server.js
+
 const express = require('express');
-const httpProxy = require('http-proxy');
-const cors = require('cors');  // Add CORS middleware
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
-const apiProxy = httpProxy.createProxyServer();
 
-// Enable CORS for all routes
-app.use(cors());
+// Ollama API URL
+const OLLAMA_API_URL = 'http://host.docker.internal:11434';
 
-// Proxy configuration: Forward requests to the Ollama API
-const OLLAMA_API_URL = 'http://127.0.0.1:11434'; // Ollama API URL
+// Proxy configuration
+app.use(
+  '/webui/api',
+  createProxyMiddleware({
+    target: OLLAMA_API_URL,
+    changeOrigin: true,
+    pathRewrite: {
+      '^/webui/api': '/api',
+    },
+    logLevel: 'debug',
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`[ProxyReq] ${req.method} ${req.originalUrl} => ${OLLAMA_API_URL}${proxyReq.path}`);
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      console.log(`[ProxyRes] ${req.method} ${req.originalUrl} => ${proxyRes.statusCode}`);
+    },
+    onError: (err, req, res) => {
+      console.error('[Proxy Error]', err);
+      res.status(500).send('Proxy Error: ' + err.message);
+    },
+    timeout: 10000,
+    proxyTimeout: 10000,
+  })
+);
 
-// Proxy requests to the Ollama API
-//app.use('/ollama', (req, res) => {
-//    apiProxy.web(req, res, { target: OLLAMA_API_URL });
-//});
-
-// Serve static WebUI from the "static" folder
+// Serve static files from the '/webui' path
 app.use('/webui', express.static('static'));
 
 // Start the HTTP server
 const PORT = 3001;
 app.listen(PORT, () => {
-    console.log(`[${new Date().toISOString()}] WebUI server running on port ${PORT}`);
+  console.log(`WebUI server running on port ${PORT}`);
 });
