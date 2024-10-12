@@ -20,12 +20,10 @@ This repository provides a streamlined setup to run **Ollama's API** locally wit
     ```
 3. Download the desired model using a `curl` command:
     ```bash
-    # Download llama3.2:1b model
     curl -X POST http://localhost:11434/api/pull -H "Content-Type: application/json" -d '{"model": "llama3.2:1b"}'
     ```
     Or use a larger model:
     ```bash
-    # Download llama3.2 model
     curl -X POST http://localhost:11434/api/pull -H "Content-Type: application/json" -d '{"model": "llama3.2"}'
     ```
 
